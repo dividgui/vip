@@ -1,0 +1,9 @@
+*** Settings ***
+Library           AutoItLibrary
+Library           Selenium2Library
+Library           OperatingSystem
+
+*** Keywords ***
+close_all
+    ${closeall}    operatingsystem.run    C:\\DELETE\\close.bat
+    log    ${closeall}

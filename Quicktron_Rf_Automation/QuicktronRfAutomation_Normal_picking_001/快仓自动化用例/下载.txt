@@ -1,0 +1,24 @@
+*** Settings ***
+Library           DateTime
+Library           Selenium2Library
+Library           AutoItLibrary
+
+*** Keywords ***
+下载xps文件
+    [Arguments]    ${title}    ${filepath}    ${filename}    # 参数1：下载框的标题 参数2：文件存放的路径 参数3：订单号
+    win wait    ${title}
+    Win Active    ${title}
+    sleep    2
+    control click    ${title}    \    Edit1
+    sleep    1
+    ${date}    get current date
+    ${date1}    evaluate    '${date}'.strip()
+    ${date2}    evaluate    '${date1}'.replace(':','-')
+    ${date3}    evaluate    '${date2}'.replace('.','-')
+    ${date4}    Catenate    ${date3}    _
+    ${filename1}    Catenate    ${date4}    ${filename}
+    ${filename2}    Catenate    ${filepath}    ${filename1}
+    ${filename3}    Catenate    ${filename2}    .xps
+    control set text    ${title}    \    Edit1    ${filename3}
+    sleep    1
+    control click    ${title}    \    Button1

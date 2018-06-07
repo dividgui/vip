@@ -1,0 +1,93 @@
+*** Settings ***
+Library           Selenium2Library
+Library           CustomLibrary
+Library           AutoItLibrary
+Resource          数据库操作.txt
+Resource          excel.txt
+
+*** Keywords ***
+wms_login
+    [Arguments]    ${wmsurl}    ${account}    ${passwd}
+    [Documentation]    输入URL，用户名，密码，登录wms系统
+    Comment    excel配置
+    open browser    ${wmsurl}    chrome    #打开谷歌浏览器
+    Maximize Browser Window    #最大化窗口
+    sleep    5
+    input text    id=account    ${account}    #输入用户名
+    sleep    2
+    input text    id=password    ${passwd}    #输入密码
+    click element    name=remember    #点击记住我
+    Click Element    xpath=html/body/div[1]/div/div/div/div[2]/div[2]/form/fieldset/div/table/tbody/tr[4]/td[2]/button    #点击登录
+    sleep    2
+    ${wms_login_text}    Get Text    Xpath=/html/body/header/div/div[1]    #获取登录后的“上海快仓WMS仓库管理系统”
+    Should Contain    ${wms_login_text}    上海快仓WMS仓库管理系统    #验证登录是否成功
+    sleep    3
+
+console_login
+    [Arguments]    ${url}    ${username}    ${password}
+    open browser    ${url}    chrome    #打开浏览器
+    Maximize Browser Window    #最大化窗口
+    sleep    2
+    input text    xpath=.//*[@id='app']/div/div[3]/div[2]/form/div[2]/div[1]/input    ${username}    #输入用户名
+    input text    xpath=.//*[@id='app']/div/div[3]/div[2]/form/div[2]/div[2]/input    ${password}    #输入密码
+    Click Element    xpath=.//*[@id='app']/div/div[3]/div[2]/form/button    #点击登录
+    ${console_login_text}    Get Text    css=span[class='hidden-folded m-l-xs inline ng-scope']    #获取text
+    Should Contain    ${console_login_text}    AGV 控制台    #验证登录是否成功
+
+station_picking_login
+    [Arguments]    ${stationpath}    ${title}    ${stationuser}    ${stationwd}
+    [Documentation]    \# start文件路径（c:\\START），工作站标题，用户名，密码，选择工作站类型（Button1,Buton2,Button3）
+    excel拣货站
+    Run All Bat    ${stationpath}
+    Wait For Active Window    ${title}
+    sleep    2
+    control click    ${title}    \    Static3    \    #点击手动
+    sleep    2
+    control set text    ${title}    \    Edit1    ${stationuser}    #输入用户名
+    sleep    1
+    control set text    ${title}    \    Edit2    ${stationwd}    #输入密码
+    sleep    1
+    Control Click    ${title}    \    Button2    \    #选拣货
+    sleep    2
+    Control Click    ${title}    \    SWT_Window07    \    #点击登录按钮
+    sleep    2
+    control click    系统提示    \    Button1    \    #点击确定按钮
+    sleep    5
+
+station_check_login
+    [Arguments]    ${filePath}    ${title}    ${username}    ${password}
+    [Documentation]    \# start文件路径（c:\\START），工作站标题，用户名，密码，选择工作站类型（Button1,Buton2,Button3）
+    Run All Bat    ${filePath}
+    Wait For Active Window    ${title}
+    sleep    2
+    control click    ${title}    \    Static3    \    #点击手动
+    sleep    2
+    control set text    ${title}    \    Edit1    ${username}    #输入用户名
+    sleep    1
+    control set text    ${title}    \    Edit2    ${password}    #输入密码
+    sleep    1
+    Control Click    ${title}    \    Button1    \    #选盘点
+    sleep    2
+    Control Click    ${title}    \    SWT_Window07    \    #点击登录按钮
+    sleep    2
+    control click    系统提示    \    Button1    \    #点击确定按钮
+    sleep    5
+
+station_putAway_login
+    [Arguments]    ${filePath}    ${title}    ${username}    ${password}
+    [Documentation]    \# start文件路径（c:\\START），工作站标题，用户名，密码，选择工作站类型（Button1,Buton2,Button3）
+    Run All Bat    ${filePath}
+    Wait For Active Window    ${title}
+    sleep    2
+    control click    ${title}    \    Static3    \    #点击手动
+    sleep    2
+    control set text    ${title}    \    Edit1    ${username}    #输入用户名
+    sleep    1
+    control set text    ${title}    \    Edit2    ${password}    #输入密码
+    sleep    1
+    Control Click    ${title}    \    Button3    \    #选补货
+    sleep    2
+    Control Click    ${title}    \    SWT_Window07    \    #点击登录按钮
+    sleep    2
+    control click    系统提示    \    Button1    \    #点击确定按钮
+    sleep    5

@@ -1,0 +1,58 @@
+*** Settings ***
+Library           Selenium2Library
+Library           DatabaseLibrary
+Resource          数据库操作.txt
+Resource          login.txt
+Resource          拣货站操作.txt
+
+*** Keywords ***
+关闭浏览器
+    close Browser
+
+拣货-添加2种商品
+    ${skunumber1}    ${skunumber2}    ${skunumber3}    查找商品
+    input text    name=inputSkuNumber    ${skunumber1}    #输入商品1
+    sleep    1
+    input text    name=inputSkuQuantity    1    #输入商品数量
+    click element    xpath=//*[@id="btnAddSku"]    #点击添加商品按钮
+    sleep    1
+    input text    name=inputSkuNumber    ${skunumber2}    #输入商品1
+    sleep    1
+    input text    name=inputSkuQuantity    2    #输入商品数量2
+    click element    xpath=//*[@id="btnAddSku"]    #点击添加商品按钮
+    sleep    1
+
+拣货-选择客户
+    click element    xpath=//*[@name="inputOrderCustomer"]//option[@value='100']    #选择客户唯品会
+    sleep    2
+
+拣货-点击保存按钮
+    click element    xpath=//*[@id="orderEditModal"]/div/div/form/div[2]/button[2]    #点击保存按钮
+    sleep    2
+
+拣货-点击保存并提交按钮
+    sleep    2
+    click element    xpath=//*[@id="orderEditModal"]/div/div/form/div[2]/button[3]    #点击保存并提交按钮
+    sleep    2
+    close browser
+
+拣货-添加1种商品
+    [Arguments]    ${skunumber1[0][0]}
+    input text    name=inputSkuNumber    ${skunumber1[0][0]}    #输入商品1
+    sleep    1
+    input text    name=inputSkuQuantity    1    #输入商品数量
+    click element    xpath=//*[@id="btnAddSku"]    #点击添加商品按钮
+    sleep    1
+
+拣货-输入订单号
+    [Arguments]    ${ordernumber[0][0]}
+    input text    name=inputOrderNumber    ${ordernumber[0][0]}    #输入订单号
+    sleep    2
+
+拣货-点击出库按钮
+    click element    xpath=//*[@id="myTab"]/li[2]/a    #点击出库，进入出库界面
+    sleep    2
+
+拣货-点击新增订单按钮
+    click element    xpath=/html/body/div[1]/aside[1]/section/div[1]/div/div/div[1]/div/div/span[1]/a    #点击新增订单按钮
+    sleep    2

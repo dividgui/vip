@@ -1,0 +1,13 @@
+*** Settings ***
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           AutoItLibrary
+Library           CustomLibrary
+Library           Process
+Library           OperatingSystem
+Resource          数据库操作.txt
+Resource          login.txt
+Resource          拣货站操作.txt
+Library           ExcelLibrary
+
+*** Keywords ***

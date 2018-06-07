@@ -1,0 +1,45 @@
+*** Settings ***
+Library           AutoItLibrary
+
+*** Test Cases ***
+查找商品1
+    Win Activate    瓦力智能系统-101
+    Control Click    瓦力智能系统-101    \    SWT_Window018    #点击手动输入条形码按钮
+    sleep    2
+    Win Activate    手工输入条码
+    sleep    2
+    control set text    手工输入条码    \    Edit1    6931395800774    #输入商品条形码
+    sleep    2
+    control click    手工输入条码    \    Button1    #点击确定按钮
+    sleep    3
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window010    #点击硬件故障按钮
+    Win Activate    系统提示
+    sleep    2
+    control click    系统提示    \    Button1    #点击确定按钮
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window09    #点击手动输入箱号
+    Win Activate    输入
+    sleep    2
+    control set text    输入    \    Edit1    BOXJCM031159
+    sleep    2
+    control click    输入    \    Button1    #点击确定按钮
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window09    #点击手动输入条形码
+    Win Activate    输入
+    sleep    2
+    control set text    输入    \    Edit1    13
+    control click    输入    \    Button1    #点击确定按钮
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window010    #点击硬件故障

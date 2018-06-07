@@ -1,0 +1,40 @@
+*** Settings ***
+Library           ExcelLibrary
+
+*** Keywords ***
+excel存放地址
+    ${excel_path}    Set Variable    E:\\robot\\Quicktron_Rf_Automation\\conf\\conf.xls    #D:\\robot\\conf.xls
+    [Return]    ${excel_path}
+
+excel配置
+    ${excel_path}    excel存放地址
+    Open Excel    ${excel_path}
+    ${wmsurl}    Read Cell Data By name    Sheet1    B2
+    log    ${wmsurl}
+    Set Global Variable    ${wmsurl}
+    ${ip}    Read Cell Data By name    Sheet1    C2
+    Set Global Variable    ${ip}
+    ${p}    Read Cell Data By name    Sheet1    D2
+    ${port}    evaluate    int(${p})
+    Set Global Variable    ${port}
+    ${user}    Read Cell Data By name    Sheet1    E2
+    ${pw}    Read Cell Data By name    Sheet1    F2
+    ${account}    Read Cell Data By name    Sheet1    G2
+    Set Global Variable    ${account}
+    ${passwd}    Read Cell Data By name    Sheet1    H2
+    Set Global Variable    ${passwd}
+    [Return]    ${wmsurl}    ${ip}    ${port}    ${user}    ${pw}    ${account}
+    ...    ${passwd}
+
+excel拣货站
+    ${excel_path}    excel存放地址
+    Open Excel    ${excel_path}
+    ${stationpath}    Read Cell Data By Name    Sheet1    B6
+    Set Global Variable    ${stationpath}
+    ${title}    Read Cell Data By name    Sheet1    C6
+    Set Global Variable    ${title}
+    ${stationuser}    Read Cell Data By name    Sheet1    D6
+    Set Global Variable    ${stationuser}
+    ${stationwd}    Read Cell Data By name    Sheet1    E6
+    Set Global Variable    ${stationwd}
+    [Return]    ${stationpath}    ${title}    ${stationuser}    ${stationwd}

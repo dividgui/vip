@@ -1,0 +1,15 @@
+*** Settings ***
+Library           DatabaseLibrary
+Resource          数据库操作.txt
+
+*** Keywords ***
+补货数据清理
+    连接数据库    database='walle_core', user='root', password='', host='192.168.21.103', port=60001
+    Execute sql Script    C:\\Python27\\clean - walle_core.sql
+    disconnect from database
+    连接数据库    database='walle_erp', user='root', password='', host='192.168.21.103', port=60001
+    Execute sql Script    C:\\Python27\\clean - walle_erp.sql
+    disconnect from database
+    连接数据库    database='walle_admin', user='root', password='', host='192.168.21.103', port=60001
+    Execute sql Script    C:\\Python27\\clean - walle_admin.sql
+    disconnect from database

@@ -1,0 +1,146 @@
+*** Settings ***
+Library           AutoItLibrary
+Library           DatabaseLibrary
+Resource          数据库操作.txt
+Resource          login.txt
+Resource          WMS.txt
+
+*** Keywords ***
+输入商品码-取消
+    control click    瓦力智能系统-101    \    SWT_Window018    #点击手动输入条形码
+    Wait For Active Window    手工输入条码
+    control set text    手工输入条码    \    Edit1    B388147002592    #输入商品条形码
+    control click    手工输入条码    \    Button2    #点击取消按钮
+
+输入商品码-确定
+    control click    瓦力智能系统-101    \    SWT_Window018    #点击手动输入条形码
+    Wait For Active Window    手工输入条码
+    control set text    手工输入条码    \    Edit1    6931395800774    #输入商品条形码
+    control click    手工输入条码    \    Button1    #点击确定按钮
+    sleep    3
+    Wait For Active Window    瓦力智能系统-101
+    sleep    1
+    Wait For Active Window    瓦力智能系统-101    \    SWT_Window03
+    control click    瓦力智能系统-101    \    SWT_Window010    #点击硬件故障按钮
+    Wait For Active Window    \    \    系统提示
+    sleep    1
+    control click    系统提示    \    Button1    #点击确定按钮
+    sleep    1
+    Wait For Active Window    瓦力智能系统-101    \    SWT_Window03
+    sleep    1
+    control click    瓦力智能系统-101    \    SWT_Window09    #点击手动输入箱号
+    Wait For Active Window    输入    \    \    #弹输入框
+    ${boxID}    获取箱号
+    control set text    输入    \    Edit1    ${boxID}
+    control click    输入    \    Button1    #点击确定按钮
+    sleep    1
+    control click    瓦力智能系统-101    \    SWT_Window09    #点击手动输入箱号
+    sleep    1
+    Wait For Active Window    输入
+    ${ordernumber}    拣货-车到工作站状态变化
+    control set text    输入    \    Edit1    ${ordernumber}
+    control click    输入    \    Button1    #点击确定按钮
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window010
+
+拣货-判断车到站
+    [Arguments]    ${ordernumber[0][0]}
+    : FOR    ${n}    IN RANGE    100    #循环10次判断
+    \    ${picking_state}    拣货-车到工作站状态变化    ${ordernumber[0][0]}    #查询数据库
+    \    log    ${n}    #循环次数打印
+    \    RUN KEYWORD IF    '${picking_state}'=='PICKING_WAITING_PICKING_PULLED'    exit for loop    #如果查询出的结果满足条件，则退出循环
+    \    sleep    5    #每次查询后，等待5秒钟后再执行下次循环
+    log    ${ordernumber[0][0]}
+    sleep    2
+
+生成订单号
+    [Arguments]    ${ip}    ${port}
+    连接数据库    database='walle_admin', user='root', password='', host='${ip}', port=${port}
+    Execute Sql String    SELECT UNIX_TIMESTAMP()
+    ${ordernumber}    query    SELECT UNIX_TIMESTAMP()
+    log    ${ordernumber[0][0]}
+    Disconnect From Database
+    [Return]    ${ordernumber[0][0]}
+
+拣货-车到工作站状态变化
+    [Arguments]    ${ordernumber[0][0]}
+    连接数据库    database='walle_erp', user='root', password='', host='${ip}', port=${port}
+    ${orderID}    query    SELECT orderID from walle_erp.picking_orders where orderNumber like \ '%${ordernumber[0][0]}%'
+    log    ${orderID[0][0]}
+    ${g}    Set Variable    ${orderID[0][0]}
+    log    ${g}
+    连接数据库    database='walle_core', user='root', password='', host='${ip}', port=${port}
+    ${aaaa}    query    SELECT jobID FROM walle_core.picking_jobs WHERE orderID = '${g}'
+    ${picking_state}    query    SELECT state FROM walle_core.jobs where \ jobID = '${aaaa[0][0]}'
+    log    ${picking_state[0][0]}
+    Comment    ${job_ID}    query    SELECT jobID from walle_core.picking_jobs where orderID ='${orderID[0][0]}'
+    Comment    ${sku_ID}    query    SELECT skuID from walle_core.picking_jobs where jobID=${jobID[0][0]}
+    Comment    ${inputsku}    query    select substring_index('${sku_ID[0][0]}', '_', 1)
+    Comment    disconnect from database
+    Comment    log    ${job_ID[0][0]}
+    Comment    log    ${picking_state[0][0]}
+    Comment    log    ${inputsku[0][0]}
+    Comment    sleep    3
+    [Return]    ${picking_state[0][0]}
+
+查找商品
+    连接数据库    database='walle_core', user='root', password='', host='192.168.20.90', port=3306
+    ${skuID}    query    SELECT skuID from bucket_slot_skus where quantity>3 LIMIT 10
+    log    ${skuID[0][0]}
+    log    ${skuID[1][0]}
+    log    ${skuID[2][0]}
+    log    ${skuID[3][0]}
+    ${skunumber1}    query    select substring_index('${skuID[0][0]}', '_', 1)
+    log    ${skunumber1[0][0]}
+    ${skunumber2}    query    select substring_index('${skuID[1][0]}', '_', 1)
+    log    ${skunumber2[0][0]}
+    ${skunumber3}    query    select substring_index('${skuID[2][0]}', '_', 1)
+    log    ${skunumber3[0][0]}
+    Disconnect From Database
+    [Return]    ${skunumber1[0][0]}    ${skunumber2[0][0]}    ${skunumber3[0][0]}
+
+获取箱号
+    连接数据库    database='walle_erp', user='root', password='', host='192.168.20.90', port=3306
+    ${boxID}    query    SELECT boxID FROM walle_erp.box where state='PROVIDED' LIMIT 1
+    disconnect from database
+    log    ${boxID[0][0]}
+    sleep    1
+    [Return]    ${boxID[0][0]}
+
+当前拣货商品sku
+    连接数据库    database='walle_core', user='root', password='', host='192.168.20.90', port=3306
+    ${jobID}    query    SELECT jobID from walle_core.picking_jobs where orderID='${pickingOrderID[0][0]}'
+    ${picking_state}    query    SELECT state from walle_core.jobs where jobID='${jobID[0][0]}'
+    ${sku_ID}    query    SELECT skuID from walle_core.picking_jobs where jobID=${jobID[0][0]}
+    ${inputsku}    query    select substring_index('${sku_ID[0][0]}', '_', 1)
+    disconnect from database
+    log    ${jobID[0][0]}
+    log    ${picking_state[0][0]}
+    log    ${inputsku[0][0]}
+    sleep    3
+    [Return]    ${inputsku[0][0]}
+
+连接walle_admin
+    [Arguments]    ${ip}    ${port}
+    连接数据库    database='walle_admin', user='root', password='', host='${ip}', port=${port}
+
+连接walle_core
+    [Arguments]    ${ip}    ${port}
+    连接数据库    database='walle_core', user='root', password='', host='${ip}', port=${port}
+
+连接walle_erp
+    [Arguments]    ${ip}    ${port}
+    连接数据库    database='walle_erp', user='root', password='', host='${ip}', port=${port}
+
+修改订单类型
+    连接数据库    database='walle_core', user='root', password='', host='${ip}', port=${port}
+
+点击输入商品条码按钮
+    control click    瓦力智能系统-101    \    SWT_Window018    #点击手动输入条形码按钮
+    sleep    2
+
+输入正确的商品条码
+    [Arguments]    ${skunumber1[0][0]}
+    Win Activate    手工输入条码
+    control set text    手工输入条码    \    Edit1    ${skunumber1[0][0]}    #输入商品条形码
+    sleep    2

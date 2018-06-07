@@ -1,0 +1,54 @@
+*** Settings ***
+Library           DatabaseLibrary
+Resource          excel.txt
+
+*** Keywords ***
+车到工作站位置判断
+    连接数据库    database='walle_core', user='root', password='', host='192.168.21.103', port=60001
+    ${state}    query    SELECT \ IF ( \ \ ( \ \ \ \ SELECT \ \ \ \ \ \ \ j.driveunitID \ \ \ \ FROM \ \ \ \ \ \ walle_core.jobs j \ \ \ \ \ LEFT JOIN \ walle_core.driveunits d \ ON j.jobid = d.jobid \ \ \ \ \ WHERE \ \ \ \ \ \ d.waypointID = '4456500' \ \ \ \ \ AND j.state = 'REPLENISHMENT_WAITING_REPLENISHMENT' \ \ ) = (SELECT driveunitID FROM walle_core.driveunits WHERE waypointID='4456500' ), \ \ '1', \ \ '2' ) ;
+    log    ${state[0][0]}
+    disconnect from database
+    [Return]    ${state[0][0]}
+
+数据库状态判断-上架中
+    [Arguments]    ${billNumber}
+    连接数据库    database='walle_erp', user='root', password='', host='192.168.21.103', port=60001
+    ${state}    query    select state from walle_erp.goods_in_bill where goodsInBillNumber='${billNumber}'
+    log    ${state[0][0]}
+    disconnect from database
+    [Return]    ${state[0][0]}
+
+数据库状态判断_待确认
+    [Arguments]    ${billNumber}
+    连接数据库    database='walle_erp', user='root', password='', host='192.168.21.103', port=60001
+    ${state}    query    select state from walle_erp.goods_in_bill where goodsInBillNumber=${billNumber}
+    log    ${state[0][0]}
+    disconnect from database
+    [Return]    ${state[0][0]}
+
+数据库状态判断_盘点
+    连接数据库    database='walle_core', user='root', password='', host='192.168.21.103', port=60001
+    ${state}    query    SELECT \ IF ( \ \ ( \ \ \ \ SELECT \ \ \ \ \ \ \ j.driveunitID \ \ \ \ FROM \ \ \ \ \ \ walle_core.jobs j \ \ \ \ \ LEFT JOIN \ walle_core.driveunits d \ ON j.jobid = d.jobid \ \ \ \ \ WHERE \ \ \ \ \ \ d.waypointID = '4456500' \ \ \ \ \ AND j.state = 'COUNTCHECK_WAITING_COUNTCHECK' \ \ ) = (SELECT driveunitID FROM walle_core.driveunits WHERE waypointID='4456500' ), \ \ '1', \ \ '2' ) ;
+    log    ${state[0][0]}
+    disconnect from database
+    [Return]    ${state[0][0]}
+
+连接数据库
+    [Arguments]    ${dbconfig}    # 数据库配置
+    [Documentation]    模板：
+    ...    database='walle_core', user='root', password='', host='192.168.21.150', port=3306
+    Connect To Database Using Custom Params    pymysql    ${dbconfig}
+
+收货-车到工作站状态变化
+    [Arguments]    ${BillNumber}
+    连接数据库    database='walle_erp', user='root', password='', host='192.168.21.103', port=60001    #连接walle_erp
+    ${goodsInBillID}    query    SELECT goodsInBillID FROM walle_erp.goods_in_bill WHERE goodsInBillNumber ='${BillNumber}'
+    ${replenishmentOrderNo}    query    SELECT replenishmentOrderNo FROM walle_erp.replenishment_orders WHERE sourceBillID = '${goodsInBillID[0][0]}'
+    disconnect from database
+    连接数据库    database='walle_core', user='root', password='', host='192.168.21.103', port=60001    #连接walle_core
+    ${jobID}    query    SELECT jobID FROM walle_core.replenishment_jobs WHERE replenishmentOrderID = '${replenishmentOrderNo[0][0]}'
+    ${state}    query    SELECT state FROM walle_core.jobs WHERE jobID = '${jobID[0][0]}'
+    disconnect from database
+    log    ${state[0][0]}
+    sleep    2
+    [Return]    ${state[0][0]}    # 小车状态

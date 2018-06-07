@@ -1,0 +1,6 @@
+*** Settings ***
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           CustomLibrary
+Library           AutoItLibrary
+Library           ExcelLibrary

@@ -1,0 +1,46 @@
+*** Settings ***
+Resource          ../数据库操作.txt
+Resource          ../login.txt
+Resource          ../WMS.txt
+Resource          ../excel.txt
+
+*** Test Cases ***
+登录wms
+    [Documentation]    ${filePath} | ${title} | ${username} | ${password}
+    [Tags]    重要
+    excel拣货站
+    Run All Bat    ${stationpath}
+    Wait For Active Window    ${title}
+    sleep    2
+    control click    ${title}    \    Static3    \    #点击手动
+    sleep    2
+    control set text    ${title}    \    Edit1    ${stationuser}    #输入用户名
+    sleep    1
+    control set text    ${title}    \    Edit2    ${stationwd}    #输入密码
+    sleep    1
+    Control Click    ${title}    \    Button2    \    #选拣货
+    sleep    2
+    Control Click    ${title}    \    SWT_Window07    \    #点击登录按钮
+    sleep    2
+    control click    系统提示    \    Button1    \    #点击确定按钮
+    sleep    5
+
+登陆工作站
+    excel配置
+    open browser    ${wmsurl}    chrome    #打开谷歌浏览器
+    Maximize Browser Window    #最大化窗口
+    sleep    5
+    input text    id=account    ${account}    #输入用户名
+    sleep    2
+    input text    id=password    ${passwd}    #输入密码
+    click element    name=remember    #点击记住我
+    Click Element    xpath=html/body/div[1]/div/div/div/div[2]/div[2]/form/fieldset/div/table/tbody/tr[4]/td[2]/button    #点击登录
+    sleep    2
+    ${wms_login_text}    Get Text    Xpath=/html/body/header/div/div[1]    #获取登录后的“上海快仓WMS仓库管理系统”
+    Should Contain    ${wms_login_text}    上海快仓WMS仓库管理系统    #验证登录是否成功
+    sleep    6
+    Close All Browsers
+
+demo
+    excel配置
+    ${orderNumber1}    生成订单号    ${ip}    ${port}

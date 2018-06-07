@@ -1,0 +1,18 @@
+*** Settings ***
+Resource          login.txt
+Library           AutoItLibrary
+Library           Selenium2Library
+Library           CustomLibrary
+Resource          WMS.txt
+Resource          数据库操作.txt
+Resource          数据清理.txt
+Library           ExcelLibrary
+Resource          excel.txt
+
+*** Test Cases ***
+dome
+    [Documentation]    ${user} | ${pw} | ${ip} | ${port}
+    点击输入商品条码按钮
+    输入正确的商品条码    ${skunumber1[0][0]}
+    Open Browser
+    Control Click

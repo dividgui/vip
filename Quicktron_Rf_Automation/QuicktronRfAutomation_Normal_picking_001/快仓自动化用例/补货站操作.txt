@@ -1,0 +1,94 @@
+*** Settings ***
+Library           AutoItLibrary
+Library           DatabaseLibrary
+Resource          数据库操作.txt
+
+*** Keywords ***
+无单进货
+    control click    瓦力智能系统-101    \    SWT_Window013    \    #点击收货
+    sleep    1
+    control click    瓦力智能系统-101    \    SWT_Window08    \    #点击无单进货
+    sleep    2
+    control click    瓦力智能系统-101    \    ComboBox1    \    #选择客户
+    send    {DOWN}
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window012    \    #点击手动输入条形码
+    Wait For Active Window    手动输入条码
+    control set text    手动输入条码    \    Edit1    00001-003    #输如商品sku
+    sleep    5
+    control click    手动输入条码    \    Button1    \    #点击确定
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window015    \    #点击商品数量
+    sleep    2
+    control set text    调整数量    \    Edit1    100    #输入商品数量
+    control click    调整数量    \    Button1
+    sleep    1
+    control click    瓦力智能系统-101    \    SWT_Window020    \    #点击确定按钮
+    sleep    1
+    control click    操作提示    \    Button1    \    #点击提示框确定按钮
+    sleep    5
+    : FOR    ${n}    IN RANGE    50
+    \    ${state}    车到工作站位置判断
+    \    run keyword if    ${state}==1    exit for loop
+    \    log    ${n}
+    \    sleep    10
+    control click    瓦力智能系统-101    \    SWT_Window016    #点击手动输入条形码
+    sleep    2
+    control set text    手动输入条码    \    Edit1    00001-003    #输入商品条形码
+    sleep    1
+    control click    手动输入条码    \    Button1    #点击确定
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window013    #点击最大按钮
+    sleep    1
+    control click    瓦力智能系统-101    \    SWT_Window038    #点击确定
+
+直接激活进货单
+    wait for active window    瓦力智能系统-101
+    control click    瓦力智能系统-101    \    SWT_Window013
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window09
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window011
+    control click    瓦力智能系统-101    \    SWT_Window015
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window011
+    : FOR    ${n}    IN RANGE    50
+    \    ${state}    车到工作站位置判断
+    \    run keyword if    ${state}==1    exit for loop
+    \    log    ${n}
+    \    sleep    10
+    control click    瓦力智能系统-101    \    SWT_Window015    #点击手动输入条形码
+    sleep    2
+    control set text    手动输入条码    \    Edit1    00001-003    #输入商品条形码
+    sleep    1
+    control click    手动输入条码    \    Button1    #点击确定
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window013    #点击最大按钮
+    sleep    1
+    control click    瓦力智能系统-101    \    SWT_Window037    #点击确定
+
+补货上架操作
+    : FOR    ${n}    IN RANGE    50
+    \    ${state}    车到工作站位置判断
+    \    run keyword if    ${state}==1    exit for loop
+    \    log    ${n}
+    \    sleep    10
+    control click    瓦力智能系统-101    \    SWT_Window016    #点击手动输入条形码
+    sleep    2
+    control set text    手动输入条码    \    Edit1    00001-003    #输入商品条形码
+    sleep    1
+    control click    手动输入条码    \    Button1    #点击确定
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window013    #点击最大按钮
+    sleep    1
+    control click    瓦力智能系统-101    \    SWT_Window037    #点击确定
+
+补货站下线
+    Wait For Active Window    瓦力智能系统-101
+    sleep    1
+    control click    瓦力智能系统-101    \    SWT_Window017    \    #点击申请下线按钮
+    sleep    5
+    control click    部分完成补货任务处理方式    \    Button2    \    #选择下线补货单状态
+    sleep    1
+    control click    部分完成补货任务处理方式    \    Button3    \    #点击确定
+    sleep    1

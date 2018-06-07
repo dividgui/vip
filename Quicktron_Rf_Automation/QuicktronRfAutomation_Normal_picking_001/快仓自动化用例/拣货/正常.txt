@@ -1,0 +1,151 @@
+*** Settings ***
+Library           AutoItLibrary
+Library           DatabaseLibrary
+Library           Selenium2Library
+Library           CustomLibrary
+Resource          ../login.txt
+Resource          ../WMS.txt
+Resource          ../数据库操作.txt
+Resource          ../拣货站操作.txt
+Resource          ../关闭进程.txt
+Library           Pywin32
+Library           pywin32
+
+*** Test Cases ***
+一单一品
+    [Documentation]    测试拣货正常流程 -------- \ 一单一品
+    Run All bat    C:\\DELETE\\关闭Chrome进程 .bat
+    excel配置
+    excel拣货站
+    ${orderNumber1}    生成订单号    ${ip}    ${port}
+    ${skunumber1}    ${skunumber2}    ${skunumber3}    查找商品
+    wms_login    ${wmsurl}    ${account}    ${passwd}
+    拣货-点击出库按钮
+    拣货-点击新增订单按钮
+    拣货-选择客户
+    拣货-输入订单号    ${orderNumber1}
+    拣货-添加1种商品    ${skunumber1}
+    拣货-点击保存按钮
+    关闭浏览器
+    station_picking_login    ${stationpath}    ${title}    ${stationuser}    ${stationwd}
+    拣货-判断车到站    ${orderNumber1}
+    点击输入商品条码按钮
+    Comment    control click    瓦力智能系统-101    \    SWT_Window018    #点击手动输入条形码按钮
+    Comment    sleep    2
+    Comment    Win Activate    手工输入条码
+    Comment    control set text    手工输入条码    \    Edit1    ${skunumber1}    #输入商品条形码
+    Comment    sleep    2
+    control click    手工输入条码    \    Button1    #点击确定按钮
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window010    #点击硬件故障按钮
+    sleep    2
+    Win Activate    系统提示
+    sleep    2
+    control click    系统提示    \    Button1    #点击确定按钮
+    sleep    1
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window09    #点击手动输入箱号
+    Win Activate    输入
+    sleep    2
+    ${boxID}    获取箱号
+    log    ${boxID}
+    control set text    输入    \    Edit1    ${boxID}
+    control click    输入    \    Button1    #点击确定按钮
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window09    #点击手动输入条形码
+    Win Activate    输入
+    sleep    2
+    control set text    输入    \    Edit1    ${ordernumber}
+    control click    输入    \    Button1    #点击确定按钮
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    control click    瓦力智能系统-101    \    SWT_Window010    #点击硬件故障
+    sleep    5
+    Win Activate    瓦力智能系统-101
+    control click    瓦力智能系统-101    \    SWT_Window020    #点击申请下线按钮
+    sleep    5
+    Win Activate    提示
+    sleep    2
+    control click    提示    \    Button1    #申请下线，点击确定按钮
+    sleep    3
+    win activate    瓦力智能系统-101
+
+test
+    control click    瓦力智能系统-101    \    SWT_Window010    #点击硬件故障按钮
+    Wait For Active Window    \    \    系统提示
+    sleep    1
+    control click    系统提示    \    Button1    #点击确定按钮
+    Wait For Active Window    瓦力智能系统-101    \    SWT_Window03
+    sleep    1
+    control click    瓦力智能系统-101    \    SWT_Window09    #点击手动输入箱号
+    Wait For Active Window    输入    \    \    #弹输入框
+
+确定按钮
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window09    #点击手动输入箱号
+    Win Activate    输入
+    sleep    2
+    ${boxID}    获取箱号
+    log    ${boxID}
+    control set text    输入    \    Edit1    ${boxID[0][0]}
+    control click    输入    \    Button1    #点击确定按钮
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window09    #点击手动输入条形码
+    Win Activate    输入
+    sleep    2
+    control set text    输入    \    Edit1    12
+    control click    输入    \    Button1    #点击确定按钮
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    control click    瓦力智能系统-101    \    SWT_Window010    #点击硬件故障
+
+关闭进程
+    Run All bat    C:\\DELETE
+
+一单多品
+    ${orderN}    拣货-选择客户    #WMS添加订单
+    拣货-添加2种商品
+    sleep    2
+    拣货-点击保存并提交按钮
+    sleep    2
+    station_picking_login    C:\\START    瓦力智能系统-101    admin    1    #启动工作站
+    : FOR    ${n}    IN RANGE    100    #循环10次判断
+    \    ${picking_state}    拣货-车到工作站状态变化    ${orderN}    #查询数据库
+    \    log    ${n}    #循环次数打印
+    \    RUN KEYWORD IF    '${picking_state}'=='PICKING_WAITING_PICKING_PULLED'    exit for loop    #如果查询出的结果满足条件，则退出循环
+    \    sleep    5    #每次查询后，等待5秒钟后再执行下次循环
+    log    ${orderN}
+    sleep    10
+    control click    瓦力智能系统-101    \    SWT_Window018    #点击手动输入条形码按钮
+    sleep    2
+    Win Activate    手工输入条码
+    control set text    手工输入条码    \    Edit1    2017080110312
+    sleep    2
+    control click    手工输入条码    \    Button1    #点击确定按钮
+    sleep    2
+    control set text    手工输入条码    \    Edit1    2017080110312
+    sleep    2
+    control click    手工输入条码    \    Button1    #点击确定按钮
+    sleep    2
+    Win Activate    瓦力智能系统-101
+    sleep    2
+    control click    瓦力智能系统-101    \    SWT_Window010    #点击硬件故障按钮
+    sleep    2
+    Win Activate    系统提示
+    sleep    2
+    control click    系统提示    \    Button1    #点击确定按钮
+    sleep    1
+
+FS订单
+    Run All bat    C:\\DELETE\\关闭Chrome进程 .bat
+    excel配置
+    excel拣货站
+    station_picking_login    ${stationpath}    ${title}    ${stationuser}    ${stationwd}
